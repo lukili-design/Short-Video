@@ -18,7 +18,9 @@ import {
   Globe,
   Users,
   Film,
-  MoreHorizontal
+  MoreHorizontal,
+  History,
+  FileText
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -426,7 +428,36 @@ export default function SeriesManagement() {
 
 function VideoBatchManagement({ seriesId }: { seriesId: number }) {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isLogModalOpen, setIsLogModalOpen] = useState(false);
+  const [selectedLogId, setSelectedLogId] = useState<number | null>(null);
   const [videoType, setVideoType] = useState<'File' | 'Library'>('File');
+  
+  const [importLogs] = useState([
+    {
+      id: 1001,
+      creator: "Admin",
+      time: "2024-01-05 14:20:00",
+      operation: "批量導入",
+      status: "成功",
+      records: [
+        { order: 1, filename: "v1.mp4", title: "第一集", desc: "描述1", v_status: "開啟", time: "2024-01-01 至 2025-01-01", pricing: "免費", validity: "-", status: "成功", reason: "-" }
+      ]
+    },
+    {
+      id: 1002,
+      creator: "Admin",
+      time: "2024-01-06 09:15:00",
+      operation: "批量導入",
+      status: "部分成功",
+      records: [
+        { order: 2, filename: "v2.mp4", title: "第二集", desc: "描述2", v_status: "開啟", time: "2024-01-01 至 2025-01-01", pricing: "付費", validity: "30天", status: "成功", reason: "-" },
+        { order: 3, filename: "v3.mp4", title: "第三集", desc: "描述3", v_status: "關閉", time: "2024-01-01 至 2025-01-01", pricing: "免費", validity: "-", status: "失敗", reason: "文件格式錯誤" }
+      ]
+    }
+  ]);
+
+  const selectedLog = importLogs.find(l => l.id === selectedLogId);
+
   const [videos, setVideos] = useState<SeriesVideo[]>([
     {
       video_id: 101,
@@ -462,6 +493,9 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
           <Button variant="outline" size="sm"><Download size={14} className="mr-2" /> 模板下載</Button>
           <Button className="bg-black text-white hover:bg-black/90" size="sm" onClick={handleImport}>
             <Upload size={14} className="mr-2" /> 批量上傳
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setIsLogModalOpen(true)}>
+            <History size={14} className="mr-2" /> 導入日誌
           </Button>
         </div>
       </CardHeader>
@@ -605,6 +639,95 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
                 <Button type="submit" className="bg-black text-white hover:bg-black/90">保存視頻</Button>
               </DialogFooter>
             </form>
+          </DialogContent>
+        </Dialog>
+
+        {/* 導入日誌彈窗 */}
+        <Dialog open={isLogModalOpen} onOpenChange={setIsLogModalOpen}>
+          <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>導入日誌</DialogTitle>
+            </DialogHeader>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>ID</TableHead>
+                  <TableHead>創建人</TableHead>
+                  <TableHead>操作時間</TableHead>
+                  <TableHead>操作</TableHead>
+                  <TableHead>狀態</TableHead>
+                  <TableHead className="text-right">詳情</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {importLogs.map((log) => (
+                  <TableRow key={log.id}>
+                    <TableCell>{log.id}</TableCell>
+                    <TableCell>{log.creator}</TableCell>
+                    <TableCell className="text-xs">{log.time}</TableCell>
+                    <TableCell>{log.operation}</TableCell>
+                    <TableCell>
+                      <Badge variant={log.status === '成功' ? 'default' : log.status === '部分成功' ? 'secondary' : 'destructive'}>
+                        {log.status}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button variant="link" size="sm" onClick={() => setSelectedLogId(log.id)}>查看詳情</Button>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </DialogContent>
+        </Dialog>
+
+        {/* 導入詳情彈窗 */}
+        <Dialog open={!!selectedLogId} onOpenChange={(open) => !open && setSelectedLogId(null)}>
+          <DialogContent className="max-w-[95vw] max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>導入詳情 - 日誌 ID: {selectedLogId}</DialogTitle>
+            </DialogHeader>
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader className="bg-gray-50">
+                  <TableRow>
+                    <TableHead className="whitespace-nowrap">順序</TableHead>
+                    <TableHead className="whitespace-nowrap">視頻檔案名稱</TableHead>
+                    <TableHead className="whitespace-nowrap">視頻標題</TableHead>
+                    <TableHead className="whitespace-nowrap">視頻描述</TableHead>
+                    <TableHead className="whitespace-nowrap">視頻狀態</TableHead>
+                    <TableHead className="whitespace-nowrap">顯示/隱藏時間</TableHead>
+                    <TableHead className="whitespace-nowrap">免費/付費</TableHead>
+                    <TableHead className="whitespace-nowrap">付費有效期</TableHead>
+                    <TableHead className="whitespace-nowrap">狀態</TableHead>
+                    <TableHead className="whitespace-nowrap">失敗原因</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {selectedLog?.records.map((rec, idx) => (
+                    <TableRow key={idx}>
+                      <TableCell>{rec.order}</TableCell>
+                      <TableCell className="max-w-[150px] truncate" title={rec.filename}>{rec.filename}</TableCell>
+                      <TableCell className="max-w-[150px] truncate" title={rec.title}>{rec.title}</TableCell>
+                      <TableCell className="max-w-[150px] truncate" title={rec.desc}>{rec.desc}</TableCell>
+                      <TableCell>{rec.v_status}</TableCell>
+                      <TableCell className="text-xs whitespace-nowrap">{rec.time}</TableCell>
+                      <TableCell>{rec.pricing}</TableCell>
+                      <TableCell>{rec.validity}</TableCell>
+                      <TableCell>
+                        <Badge variant={rec.status === '成功' ? 'default' : 'destructive'}>
+                          {rec.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-red-500 text-xs">{rec.reason}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+            <DialogFooter>
+              <Button onClick={() => setSelectedLogId(null)}>關閉</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
       </CardFooter>
