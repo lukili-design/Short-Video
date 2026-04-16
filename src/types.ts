@@ -3,8 +3,6 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-export type SeriesType = 'News' | 'ShortVideo' | 'ShortDrama';
-
 export interface Category {
   id: number;
   name: string;
@@ -30,7 +28,6 @@ export interface SeriesVideo {
   type: 'File' | 'Library';
   title: string;
   description?: string;
-  is_free: boolean;
   paid_validity_start?: string;
   paid_validity_end?: string;
   status: 'Active' | 'Inactive';
@@ -42,9 +39,8 @@ export interface SeriesVideo {
 export interface Series {
   id: number;
   name: string;
-  type: SeriesType;
   category_ids: number[]; // 可以選擇1-5個短劇分類
-  cover_image: string; // Landscape 16:9
+  cover_image: string; // Portrait 3:4
   short_desc: string;
   long_desc?: string;
   tags: string[]; // 0-5個標籤
@@ -55,13 +51,15 @@ export interface Series {
   show_episode_count: boolean; // 顯示集數: 開啟、關閉
   regions: string[]; // 授權播放區域: 香港、澳門
   artist_ids: number[]; // 0-50個
+  pricing_type: 'Free' | 'Paid';
+  free_episodes_count?: number;
   seo_title: string;
   seo_description: string;
   creator: string;
   author?: string;
   created_at: string;
   updated_at: string;
-  series_updated_at: string; // 清單更新時間
+  series_updated_at: string; // 短劇更新時間
   videos: SeriesVideo[];
 }
 

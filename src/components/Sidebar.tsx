@@ -54,32 +54,14 @@ export default function Sidebar({ currentSubMenu, onSubMenuChange }: SidebarProp
                 onClick={() => onSubMenuChange('CATEGORY')} 
               />
               <SubNavItem 
+                label="短劇管理" 
+                active={currentSubMenu === 'SERIES'} 
+                onClick={() => onSubMenuChange('SERIES')} 
+              />
+              <SubNavItem 
                 label="Artists 管理" 
                 active={currentSubMenu === 'ARTISTS'} 
                 onClick={() => onSubMenuChange('ARTISTS')} 
-              />
-            </div>
-          )}
-        </div>
-
-        <div className="py-2">
-          <div 
-            className="flex items-center justify-between px-3 py-2 text-gray-600 hover:bg-gray-100 rounded-lg cursor-pointer transition-colors"
-            onClick={() => setIsSeriesMgmtOpen(!isSeriesMgmtOpen)}
-          >
-            <div className="flex items-center gap-3">
-              <List size={18} />
-              <span className="text-sm font-medium">清單管理</span>
-            </div>
-            {isSeriesMgmtOpen ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-          </div>
-          
-          {isSeriesMgmtOpen && (
-            <div className="pl-9 space-y-1 mt-1">
-              <SubNavItem 
-                label="清單管理" 
-                active={currentSubMenu === 'SERIES'} 
-                onClick={() => onSubMenuChange('SERIES')} 
               />
             </div>
           )}

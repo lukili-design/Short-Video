@@ -62,16 +62,15 @@ import {
   DialogTitle, 
   DialogTrigger 
 } from '@/components/ui/dialog';
-import { Series, SeriesVideo, SeriesType } from '../types';
+import { Series, SeriesVideo } from '../types';
 import { toast } from 'sonner';
 
 const MOCK_SERIES: Series[] = [
   {
     id: 1,
     name: "龍王歸來：戰神贅婿",
-    type: 'ShortDrama',
     category_ids: [1],
-    cover_image: "https://picsum.photos/seed/drama1/800/450",
+    cover_image: "https://picsum.photos/seed/drama1/600/800",
     short_desc: "一代戰神隱退都市，竟成豪門贅婿？",
     tags: ["戰神", "贅婿"],
     status: 'Active',
@@ -81,6 +80,8 @@ const MOCK_SERIES: Series[] = [
     show_episode_count: true,
     regions: ["HK"],
     artist_ids: [1, 2],
+    pricing_type: 'Paid',
+    free_episodes_count: 5,
     seo_title: "龍王歸來：戰神贅婿",
     seo_description: "一代戰神隱退都市，竟成豪門贅婿？",
     creator: "Admin",
@@ -97,36 +98,37 @@ export default function SeriesManagement() {
   const [seriesList, setSeriesList] = useState<Series[]>(MOCK_SERIES);
   const [editingSeries, setEditingSeries] = useState<Series | null>(null);
   const [activeTab, setActiveTab] = useState('basic');
+  const [pricingType, setPricingType] = useState<'Free' | 'Paid'>(editingSeries?.pricing_type || 'Free');
   
   // Filters
   const [filterName, setFilterName] = useState('');
-  const [filterType, setFilterType] = useState<string>('all');
   const [filterStatus, setFilterStatus] = useState<string>('all');
   const [filterVisible, setFilterVisible] = useState<string>('all');
 
   const filteredSeries = seriesList.filter(s => {
     const matchesName = s.name.toLowerCase().includes(filterName.toLowerCase());
-    const matchesType = filterType === 'all' || s.type === filterType;
     const matchesStatus = filterStatus === 'all' || s.status === filterStatus;
     const matchesVisible = filterVisible === 'all' || (filterVisible === 'true' ? s.visible_to_client : !s.visible_to_client);
-    return matchesName && matchesType && matchesStatus && matchesVisible;
+    return matchesName && matchesStatus && matchesVisible;
   });
 
   const handleAdd = () => {
     setEditingSeries(null);
+    setPricingType('Free');
     setActiveTab('basic');
     setView('FORM');
   };
 
   const handleEdit = (series: Series, tab: string = 'basic') => {
     setEditingSeries(series);
+    setPricingType(series.pricing_type);
     setActiveTab(tab);
     setView('FORM');
   };
 
   const handleSave = (e: React.FormEvent) => {
     e.preventDefault();
-    toast.success(editingSeries ? '清單修改成功' : '清單新增成功');
+    toast.success(editingSeries ? '短劇修改成功' : '短劇新增成功');
     setView('LIST');
   };
 
@@ -138,12 +140,12 @@ export default function SeriesManagement() {
             <Button variant="ghost" size="icon" onClick={() => setView('LIST')}>
               <ChevronLeft size={20} />
             </Button>
-            <h2 className="text-2xl font-bold">{editingSeries ? '修改清單' : '新增清單'}</h2>
+            <h2 className="text-2xl font-bold">{editingSeries ? '修改短劇' : '新增短劇'}</h2>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" onClick={() => setView('LIST')}>取消</Button>
             <Button onClick={handleSave} className="bg-black text-white hover:bg-black/90">
-              <Save size={18} className="mr-2" /> 保存清單
+              <Save size={18} className="mr-2" /> 保存短劇
             </Button>
           </div>
         </div>
@@ -159,26 +161,54 @@ export default function SeriesManagement() {
               <CardHeader><CardTitle>核心信息</CardTitle></CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="s_name">清單名稱 <span className="text-red-500">*</span></Label>
+                  <Label htmlFor="s_name">短劇名稱 <span className="text-red-500">*</span></Label>
                   <Input id="s_name" defaultValue={editingSeries?.name} maxLength={30} placeholder="0-30字" required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="s_type">清單類型 <span className="text-red-500">*</span></Label>
-                  <Select defaultValue={editingSeries?.type || 'ShortDrama'}>
-                    <SelectTrigger><SelectValue placeholder="選擇類型" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="News">普通新聞</SelectItem>
-                      <SelectItem value="ShortVideo">短視頻</SelectItem>
-                      <SelectItem value="ShortDrama">短劇</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label>清單分類 <span className="text-red-500">*</span></Label>
+                  <Label>短劇分類 <span className="text-red-500">*</span></Label>
                   <div className="flex flex-wrap gap-2 p-2 border rounded-md bg-gray-50 min-h-[40px]">
                     <Badge variant="secondary">都市熱血</Badge>
                     <Button variant="ghost" size="sm" className="h-6 text-[10px]">+ 選擇 (1-5個)</Button>
                   </div>
+                </div>
+                <div className="space-y-2">
+                  <Label>付費模式 <span className="text-red-500">*</span></Label>
+                  <div className="flex items-center gap-4 pt-1">
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="radio" 
+                        id="price_free" 
+                        name="pricing" 
+                        checked={pricingType === 'Free'} 
+                        onChange={() => setPricingType('Free')}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="price_free" className="font-normal">免費</Label>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input 
+                        type="radio" 
+                        id="price_paid" 
+                        name="pricing" 
+                        checked={pricingType === 'Paid'} 
+                        onChange={() => setPricingType('Paid')}
+                        className="w-4 h-4"
+                      />
+                      <Label htmlFor="price_paid" className="font-normal">付費</Label>
+                    </div>
+                  </div>
+                  {pricingType === 'Paid' && (
+                    <div className="flex items-center gap-2 mt-2 pl-6">
+                      <span className="text-sm text-gray-500">首</span>
+                      <Input 
+                        type="number" 
+                        className="w-20 h-8" 
+                        defaultValue={editingSeries?.free_episodes_count || 0} 
+                        placeholder="數字"
+                      />
+                      <span className="text-sm text-gray-500">集免費</span>
+                    </div>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <Label>顯示集數</Label>
@@ -188,9 +218,9 @@ export default function SeriesManagement() {
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <Label>封面圖 (16:9) <span className="text-red-500">*</span></Label>
+                  <Label>封面圖 (3:4) <span className="text-red-500">*</span></Label>
                   <div className="flex gap-4 items-start">
-                    <div className="w-48 h-27 bg-gray-100 rounded border-2 border-dashed flex items-center justify-center overflow-hidden">
+                    <div className="w-36 h-48 bg-gray-100 rounded border-2 border-dashed flex items-center justify-center overflow-hidden">
                       {editingSeries?.cover_image ? (
                         <img src={editingSeries.cover_image} className="w-full h-full object-cover" />
                       ) : (
@@ -199,7 +229,7 @@ export default function SeriesManagement() {
                     </div>
                     <div className="flex-1 space-y-1">
                       <Button variant="outline" size="sm" type="button">上傳圖片</Button>
-                      <p className="text-[10px] text-gray-500">建議比例 16:9</p>
+                      <p className="text-[10px] text-gray-500">建議比例 3:4</p>
                     </div>
                   </div>
                 </div>
@@ -294,9 +324,9 @@ export default function SeriesManagement() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">清單管理</h2>
+        <h2 className="text-2xl font-bold">短劇管理</h2>
         <Button onClick={handleAdd} className="bg-black text-white hover:bg-black/90">
-          <Plus size={18} className="mr-2" /> 新增清單
+          <Plus size={18} className="mr-2" /> 新增短劇
         </Button>
       </div>
 
@@ -304,28 +334,16 @@ export default function SeriesManagement() {
         <CardContent className="p-6">
           <div className="grid grid-cols-4 gap-4">
             <div className="space-y-2">
-              <Label>清單名稱</Label>
+              <Label>短劇名稱</Label>
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={16} />
                 <Input 
-                  placeholder="搜索清單名稱..." 
+                  placeholder="搜索短劇名稱..." 
                   className="pl-9" 
                   value={filterName}
                   onChange={(e) => setFilterName(e.target.value)}
                 />
               </div>
-            </div>
-            <div className="space-y-2">
-              <Label>清單類型</Label>
-              <Select value={filterType} onValueChange={setFilterType}>
-                <SelectTrigger><SelectValue placeholder="全部類型" /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部類型</SelectItem>
-                  <SelectItem value="News">普通新聞</SelectItem>
-                  <SelectItem value="ShortVideo">短視頻</SelectItem>
-                  <SelectItem value="ShortDrama">短劇</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
             <div className="space-y-2">
               <Label>狀態</Label>
@@ -355,7 +373,6 @@ export default function SeriesManagement() {
               </Button>
               <Button variant="outline" onClick={() => {
                 setFilterName('');
-                setFilterType('all');
                 setFilterStatus('all');
                 setFilterVisible('all');
               }}>重置篩選</Button>
@@ -368,16 +385,15 @@ export default function SeriesManagement() {
         <Table>
           <TableHeader className="bg-gray-50">
             <TableRow>
-              <TableHead className="w-[80px]">清單ID</TableHead>
-              <TableHead>清單名稱</TableHead>
-              <TableHead>清單類型</TableHead>
+              <TableHead className="w-[80px]">短劇ID</TableHead>
+              <TableHead>短劇名稱</TableHead>
               <TableHead>狀態</TableHead>
               <TableHead>用戶端可見</TableHead>
               <TableHead>創建人</TableHead>
               <TableHead>作者</TableHead>
               <TableHead>創建時間</TableHead>
               <TableHead>更新時間</TableHead>
-              <TableHead>清單更新時間</TableHead>
+              <TableHead>短劇更新時間</TableHead>
               <TableHead className="text-right">操作</TableHead>
             </TableRow>
           </TableHeader>
@@ -386,9 +402,6 @@ export default function SeriesManagement() {
               <TableRow key={s.id}>
                 <TableCell className="font-mono text-xs text-gray-500">{s.id}</TableCell>
                 <TableCell className="font-medium">{s.name}</TableCell>
-                <TableCell>
-                  <Badge variant="outline">{s.type}</Badge>
-                </TableCell>
                 <TableCell>
                   <Badge variant={s.status === 'Active' ? 'default' : 'secondary'}>
                     {s.status === 'Active' ? '開啟' : '關閉'}
@@ -464,7 +477,6 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
       type: 'File',
       title: "第1集：戰神回歸",
       description: "龍王戰神低調回歸",
-      is_free: true,
       status: 'Active',
       show_time_start: "2024-01-01 00:00:00",
       show_time_end: "2025-12-31 23:59:59",
@@ -487,7 +499,7 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
       <CardHeader className="flex flex-row items-center justify-between">
         <div>
           <CardTitle>單個視頻批量管理</CardTitle>
-          <CardDescription>管理清單下的視頻實體，支持批量上傳與連載更新</CardDescription>
+          <CardDescription>管理短劇下的視頻實體，支持批量上傳與連載更新</CardDescription>
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm"><Download size={14} className="mr-2" /> 模板下載</Button>
@@ -506,7 +518,6 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
               <TableHead className="w-[60px]">順序</TableHead>
               <TableHead>視頻標題</TableHead>
               <TableHead>類型</TableHead>
-              <TableHead>免費/付費</TableHead>
               <TableHead>狀態</TableHead>
               <TableHead>顯示/隱藏時間</TableHead>
               <TableHead className="text-right">操作</TableHead>
@@ -521,11 +532,6 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
                   <div className="text-xs text-gray-500 truncate max-w-[200px]">{v.description}</div>
                 </TableCell>
                 <TableCell><Badge variant="outline">{v.type === 'File' ? '視頻文件' : '視頻庫'}</Badge></TableCell>
-                <TableCell>
-                  <Badge variant={v.is_free ? 'secondary' : 'default'}>
-                    {v.is_free ? '免費' : '付費'}
-                  </Badge>
-                </TableCell>
                 <TableCell>
                   <Badge variant={v.status === 'Active' ? 'default' : 'secondary'}>
                     {v.status === 'Active' ? '開啟' : '關閉'}
@@ -600,14 +606,6 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
               <div className="space-y-2">
                 <Label htmlFor="v_desc">視頻描述</Label>
                 <Textarea id="v_desc" placeholder="輸入視頻簡介..." />
-              </div>
-
-              <div className="space-y-2">
-                <Label>是否免費</Label>
-                <div className="flex items-center gap-2 pt-2">
-                  <Switch defaultChecked={true} />
-                  <span className="text-sm text-gray-500">免費 / 付費</span>
-                </div>
               </div>
 
               <div className="space-y-2">
@@ -697,8 +695,6 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
                     <TableHead className="whitespace-nowrap">視頻描述</TableHead>
                     <TableHead className="whitespace-nowrap">視頻狀態</TableHead>
                     <TableHead className="whitespace-nowrap">顯示/隱藏時間</TableHead>
-                    <TableHead className="whitespace-nowrap">免費/付費</TableHead>
-                    <TableHead className="whitespace-nowrap">付費有效期</TableHead>
                     <TableHead className="whitespace-nowrap">狀態</TableHead>
                     <TableHead className="whitespace-nowrap">失敗原因</TableHead>
                   </TableRow>
@@ -712,8 +708,6 @@ function VideoBatchManagement({ seriesId }: { seriesId: number }) {
                       <TableCell className="max-w-[150px] truncate" title={rec.desc}>{rec.desc}</TableCell>
                       <TableCell>{rec.v_status}</TableCell>
                       <TableCell className="text-xs whitespace-nowrap">{rec.time}</TableCell>
-                      <TableCell>{rec.pricing}</TableCell>
-                      <TableCell>{rec.validity}</TableCell>
                       <TableCell>
                         <Badge variant={rec.status === '成功' ? 'default' : 'destructive'}>
                           {rec.status}
