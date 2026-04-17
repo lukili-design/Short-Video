@@ -53,6 +53,8 @@ export interface Series {
   artist_ids: number[]; // 0-50個
   pricing_type: 'Free' | 'Paid';
   free_episodes_count?: number;
+  pay_validity_start?: string;
+  pay_validity_end?: string;
   seo_title: string;
   seo_description: string;
   creator: string;

@@ -126,13 +126,6 @@ export default function CategoryManagement() {
                   <span className="text-sm text-gray-500">開啟 / 關閉</span>
                 </div>
               </div>
-              <div className="space-y-2">
-                <Label>用戶端是否可見</Label>
-                <div className="flex items-center gap-2 pt-2">
-                  <Switch defaultChecked={editingCategory?.visible_to_client ?? true} />
-                  <span className="text-sm text-gray-500">可見 / 隱藏</span>
-                </div>
-              </div>
             </CardContent>
           </Card>
 
@@ -220,19 +213,6 @@ export default function CategoryManagement() {
                   <SelectItem value="all">全部狀態</SelectItem>
                   <SelectItem value="Active">開啟</SelectItem>
                   <SelectItem value="Inactive">關閉</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label>用戶端是否可見</Label>
-              <Select value={filterVisible} onValueChange={setFilterVisible}>
-                <SelectTrigger>
-                  <SelectValue placeholder="全部" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">全部</SelectItem>
-                  <SelectItem value="true">可見</SelectItem>
-                  <SelectItem value="false">隱藏</SelectItem>
                 </SelectContent>
               </Select>
             </div>

@@ -82,6 +82,8 @@ const MOCK_SERIES: Series[] = [
     artist_ids: [1, 2],
     pricing_type: 'Paid',
     free_episodes_count: 5,
+    pay_validity_start: "2024-01-01 00:00:00",
+    pay_validity_end: "2025-12-31 23:59:59",
     seo_title: "龍王歸來：戰神贅婿",
     seo_description: "一代戰神隱退都市，竟成豪門贅婿？",
     creator: "Admin",
@@ -198,15 +200,38 @@ export default function SeriesManagement() {
                     </div>
                   </div>
                   {pricingType === 'Paid' && (
-                    <div className="flex items-center gap-2 mt-2 pl-6">
-                      <span className="text-sm text-gray-500">首</span>
-                      <Input 
-                        type="number" 
-                        className="w-20 h-8" 
-                        defaultValue={editingSeries?.free_episodes_count || 0} 
-                        placeholder="數字"
-                      />
-                      <span className="text-sm text-gray-500">集免費</span>
+                    <div className="space-y-4 mt-2 pl-6">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-500">首</span>
+                        <Input 
+                          type="number" 
+                          className="w-20 h-8" 
+                          defaultValue={editingSeries?.free_episodes_count || 0} 
+                          placeholder="數字"
+                        />
+                        <span className="text-sm text-gray-500">集免費</span>
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="text-xs text-gray-500">付費有效期</Label>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div className="relative">
+                            <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                            <Input 
+                              className="pl-8 h-8 text-xs" 
+                              type="datetime-local" 
+                              defaultValue={editingSeries?.pay_validity_start?.replace(' ', 'T')} 
+                            />
+                          </div>
+                          <div className="relative">
+                            <Calendar className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                            <Input 
+                              className="pl-8 h-8 text-xs" 
+                              type="datetime-local" 
+                              defaultValue={editingSeries?.pay_validity_end?.replace(' ', 'T')} 
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
